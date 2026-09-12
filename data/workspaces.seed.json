@@ -1,0 +1,249 @@
+[
+  {
+    "id": "WS001",
+    "name": "Qdesq Hub - Koramangala",
+    "city": "Bangalore",
+    "workspace_type": "dedicated_desk",
+    "capacity_min": 5,
+    "capacity_max": 20,
+    "price_per_seat_inr": 9000,
+    "amenities": [
+      "24x7 access",
+      "high-speed wifi",
+      "meeting rooms",
+      "cafeteria"
+    ],
+    "available_from": "immediate",
+    "rating": 4.5
+  },
+  {
+    "id": "WS002",
+    "name": "Qdesq Hub - Indiranagar",
+    "city": "Bangalore",
+    "workspace_type": "private_cabin",
+    "capacity_min": 10,
+    "capacity_max": 50,
+    "price_per_seat_inr": 13500,
+    "amenities": [
+      "private cabins",
+      "reception",
+      "parking",
+      "meeting rooms"
+    ],
+    "available_from": "immediate",
+    "rating": 4.7
+  },
+  {
+    "id": "WS003",
+    "name": "Qdesq Express - Whitefield",
+    "city": "Bangalore",
+    "workspace_type": "hot_desk",
+    "capacity_min": 1,
+    "capacity_max": 10,
+    "price_per_seat_inr": 6000,
+    "amenities": [
+      "flexible seating",
+      "wifi",
+      "coffee bar"
+    ],
+    "available_from": "immediate",
+    "rating": 4.1
+  },
+  {
+    "id": "WS004",
+    "name": "Qdesq Managed - Andheri East",
+    "city": "Mumbai",
+    "workspace_type": "managed_office",
+    "capacity_min": 20,
+    "capacity_max": 100,
+    "price_per_seat_inr": 15000,
+    "amenities": [
+      "custom fit-out",
+      "IT support",
+      "dedicated admin",
+      "cafeteria"
+    ],
+    "available_from": "45 days",
+    "rating": 4.6
+  },
+  {
+    "id": "WS005",
+    "name": "Qdesq Hub - Lower Parel",
+    "city": "Mumbai",
+    "workspace_type": "dedicated_desk",
+    "capacity_min": 5,
+    "capacity_max": 25,
+    "price_per_seat_inr": 11000,
+    "amenities": [
+      "high-speed wifi",
+      "meeting rooms",
+      "printing"
+    ],
+    "available_from": "immediate",
+    "rating": 4.3
+  },
+  {
+    "id": "WS006",
+    "name": "Qdesq Express - BKC",
+    "city": "Mumbai",
+    "workspace_type": "private_cabin",
+    "capacity_min": 8,
+    "capacity_max": 30,
+    "price_per_seat_inr": 18000,
+    "amenities": [
+      "premium location",
+      "reception",
+      "meeting rooms",
+      "parking"
+    ],
+    "available_from": "30 days",
+    "rating": 4.8
+  },
+  {
+    "id": "WS007",
+    "name": "Qdesq Hub - Cyber City",
+    "city": "Gurgaon",
+    "workspace_type": "managed_office",
+    "capacity_min": 15,
+    "capacity_max": 80,
+    "price_per_seat_inr": 12000,
+    "amenities": [
+      "custom fit-out",
+      "cafeteria",
+      "24x7 access",
+      "parking"
+    ],
+    "available_from": "immediate",
+    "rating": 4.4
+  },
+  {
+    "id": "WS008",
+    "name": "Qdesq Express - Sector 44",
+    "city": "Gurgaon",
+    "workspace_type": "hot_desk",
+    "capacity_min": 1,
+    "capacity_max": 8,
+    "price_per_seat_inr": 5500,
+    "amenities": [
+      "flexible seating",
+      "wifi"
+    ],
+    "available_from": "immediate",
+    "rating": 4.0
+  },
+  {
+    "id": "WS009",
+    "name": "Qdesq Hub - Salt Lake",
+    "city": "Kolkata",
+    "workspace_type": "dedicated_desk",
+    "capacity_min": 5,
+    "capacity_max": 20,
+    "price_per_seat_inr": 7000,
+    "amenities": [
+      "wifi",
+      "meeting rooms",
+      "cafeteria"
+    ],
+    "available_from": "immediate",
+    "rating": 4.2
+  },
+  {
+    "id": "WS010",
+    "name": "Qdesq Managed - Hitech City",
+    "city": "Hyderabad",
+    "workspace_type": "managed_office",
+    "capacity_min": 25,
+    "capacity_max": 120,
+    "price_per_seat_inr": 11500,
+    "amenities": [
+      "custom fit-out",
+      "IT support",
+      "cafeteria",
+      "parking"
+    ],
+    "available_from": "60 days",
+    "rating": 4.5
+  },
+  {
+    "id": "WS011",
+    "name": "Qdesq Hub - Baner",
+    "city": "Pune",
+    "workspace_type": "dedicated_desk",
+    "capacity_min": 5,
+    "capacity_max": 30,
+    "price_per_seat_inr": 8000,
+    "amenities": [
+      "wifi",
+      "meeting rooms",
+      "parking"
+    ],
+    "available_from": "immediate",
+    "rating": 4.3
+  },
+  {
+    "id": "WS012",
+    "name": "Qdesq Express - Kharagpur Tech Park",
+    "city": "Kharagpur",
+    "workspace_type": "hot_desk",
+    "capacity_min": 1,
+    "capacity_max": 6,
+    "price_per_seat_inr": 4000,
+    "amenities": [
+      "wifi",
+      "coffee bar"
+    ],
+    "available_from": "immediate",
+    "rating": 3.9
+  },
+  {
+    "id": "WS013",
+    "name": "Qdesq Hub - Koramangala Day Pass",
+    "city": "Bangalore",
+    "workspace_type": "day_pass",
+    "capacity_min": 1,
+    "capacity_max": 4,
+    "price_per_seat_inr": 800,
+    "amenities": [
+      "wifi",
+      "coffee bar",
+      "printing"
+    ],
+    "available_from": "immediate",
+    "rating": 4.4,
+    "daily_capacity": 5
+  },
+  {
+    "id": "WS014",
+    "name": "Qdesq Express - Sector 44 Meeting Room",
+    "city": "Gurgaon",
+    "workspace_type": "meeting_room",
+    "capacity_min": 2,
+    "capacity_max": 8,
+    "price_per_seat_inr": 500,
+    "amenities": [
+      "projector",
+      "whiteboard",
+      "wifi"
+    ],
+    "available_from": "immediate",
+    "rating": 4.2,
+    "daily_capacity": 5
+  },
+  {
+    "id": "WS015",
+    "name": "Qdesq Hub - Lower Parel Meeting Room",
+    "city": "Mumbai",
+    "workspace_type": "meeting_room",
+    "capacity_min": 2,
+    "capacity_max": 12,
+    "price_per_seat_inr": 600,
+    "amenities": [
+      "projector",
+      "whiteboard",
+      "video conferencing"
+    ],
+    "available_from": "immediate",
+    "rating": 4.5,
+    "daily_capacity": 5
+  }
+]
