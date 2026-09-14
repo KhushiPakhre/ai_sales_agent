@@ -1,294 +1,226 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Users, 
-  Flame, 
-  CalendarCheck, 
-  Compass, 
-  UserCheck, 
-  TrendingUp,
-  ArrowRight,
-  MessageSquare,
-  Sparkles,
-  Building2
-} from 'lucide-react';
-import MetricCard from '../components/MetricCard';
-import { getAnalyticsOverview, getLeads, getHandoffs, getWorkspaces } from '../api/client';
+ import React from 'react'
+import { Link } from 'react-router-dom'
+import { api } from '../api/client.js'
+import { useApiData } from '../hooks/useApiData.js'
+import MetricCard from '../components/MetricCard.jsx'
+import PageHeader from '../components/PageHeader.jsx'
+import { ErrorState, SkeletonCard } from '../components/Feedback.jsx'
+
+// Metric Icons
+const LeadsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+  </svg>
+)
+const HotIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2c0 4-4 6-4 10a4 4 0 008 0c0-4-4-6-4-10z" />
+    <path d="M12 12c0 2-2 3-2 5a2 2 0 004 0c0-2-2-3-2-5z" />
+  </svg>
+)
+const BookingIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+    <path d="M9 16l2 2 4-4" />
+  </svg>
+)
+const TourIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12,6 12,12 16,14" />
+  </svg>
+)
+const HandoffIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="17,1 21,5 17,9" />
+    <path d="M3 11V9a4 4 0 014-4h14" />
+    <polyline points="7,23 3,19 7,15" />
+    <path d="M21 13v2a4 4 0 01-4 4H3" />
+  </svg>
+)
+const ConversionIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22,7 13.5,15.5 8.5,10.5 2,17" />
+    <polyline points="16,7 22,7 22,13" />
+  </svg>
+)
+
+function TierBar({ label, value, total, color, bgColor }) {
+  const pct = total && total > 0 ? Math.round((value / total) * 100) : 0
+  return (
+    <div>
+      <div className="flex justify-between items-center text-xs mb-1.5">
+        <span className="font-medium text-slate-700">{label}</span>
+        <span className="text-slate-500">
+          <span className="font-semibold text-slate-800">{value}</span>
+          <span className="text-slate-400 ml-1">({pct}%)</span>
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div
+          className={`h-full rounded-full ${color} transition-all duration-700 ease-out`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function QuickActionCard({ to, icon: Icon, label, description, accent }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all duration-150 group"
+    >
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${accent}`}>
+        <Icon />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-slate-900 group-hover:text-brand-700">{label}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+      </div>
+    </Link>
+  )
+}
+
+const ChatActionIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-brand-600">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+  </svg>
+)
+const LeadsActionIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+  </svg>
+)
+const HandoffActionIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
+    <polyline points="17,1 21,5 17,9" />
+    <path d="M3 11V9a4 4 0 014-4h14" />
+    <polyline points="7,23 3,19 7,15" />
+    <path d="M21 13v2a4 4 0 01-4 4H3" />
+  </svg>
+)
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const [data, setData] = useState({
-    leads: [],
-    handoffs: [],
-    workspaces: [],
-    analytics: null,
-    loading: true,
-    error: null
-  });
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [leads, handoffs, workspaces, analytics] = await Promise.all([
-          getLeads(),
-          getHandoffs(),
-          getWorkspaces(),
-          getAnalyticsOverview()
-        ]);
-        setData({
-          leads: Array.isArray(leads) ? leads : [],
-          handoffs: Array.isArray(handoffs) ? handoffs : [],
-          workspaces: Array.isArray(workspaces) ? workspaces : [],
-          analytics,
-          loading: false,
-          error: null
-        });
-      } catch (err) {
-        setData(prev => ({ ...prev, loading: false, error: err.message }));
-      }
-    }
-    loadData();
-  }, []);
-
-  if (data.loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
-
-  if (data.error) {
-    return (
-      <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm">
-        Failed to load dashboard data: {data.error}
-      </div>
-    );
-  }
-
-  const leads = data.leads;
-  const hotLeads = leads.filter(l => (l.score_category || l.scoreCategory || '').toLowerCase() === 'hot');
-  const warmLeads = leads.filter(l => (l.score_category || l.scoreCategory || '').toLowerCase() === 'warm');
-  const coldLeads = leads.filter(l => (l.score_category || l.scoreCategory || '').toLowerCase() === 'cold');
-
-  const pendingHandoffs = data.handoffs.filter(h => h.status === 'pending');
-  const analyticsData = data.analytics || {};
-
-  const handleKeyDown = (e, callback) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      callback();
-    }
-  };
+  const { data, loading, error, reload } = useApiData(() => api.getAnalytics(), [])
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Overview of sales AI activity and pipeline health</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        subtitle="Live snapshot of your pipeline, bookings, and agent performance."
+      />
 
-      {/* Top Metric Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <MetricCard
-          title="Total Leads"
-          value={leads.length}
-          icon={Users}
-          trend={+12}
-          color="indigo"
-          onClick={() => navigate('/leads')}
-        />
-        <MetricCard
-          title="Hot Leads"
-          value={hotLeads.length}
-          icon={Flame}
-          color="rose"
-          onClick={() => navigate('/leads?score=hot')}
-        />
-        <MetricCard
-          title="Bookings"
-          value={analyticsData.total_bookings ?? 0}
-          icon={CalendarCheck}
-          trend={+8}
-          color="emerald"
-          onClick={() => navigate('/bookings')}
-        />
-        <MetricCard
-          title="Tours Scheduled"
-          value={analyticsData.total_tours ?? 0}
-          icon={Compass}
-          color="amber"
-          onClick={() => navigate('/tours')}
-        />
-        <MetricCard
-          title="Pending Handoffs"
-          value={pendingHandoffs.length}
-          icon={UserCheck}
-          color="violet"
-          onClick={() => navigate('/handoffs?status=pending')}
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value={`${analyticsData.conversion_rate ?? 0}%`}
-          icon={TrendingUp}
-          trend={+2.4}
-          color="sky"
-          onClick={() => navigate('/analytics')}
-        />
-      </div>
+      {error && <ErrorState message={error.message} onRetry={reload} />}
 
-      {/* Main Grid: Pipeline + Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pipeline Breakdown */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900 mb-4">Lead Pipeline</h2>
-          <div className="space-y-4">
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate('/leads?score=hot')}
-              onKeyDown={(e) => handleKeyDown(e, () => navigate('/leads?score=hot'))}
-              className="p-2 -mx-2 rounded-lg cursor-pointer hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="font-medium text-slate-700 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                  Hot Leads
-                </span>
-                <span className="text-slate-500 font-medium">
-                  {hotLeads.length} ({leads.length ? Math.round((hotLeads.length / leads.length) * 100) : 0}%)
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-rose-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${leads.length ? (hotLeads.length / leads.length) * 100 : 0}%` }}
+      {!error && (
+        <>
+          {/* Metric cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+            {loading || !data ? (
+              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : (
+              <>
+                <MetricCard label="Total Leads" value={data.total_leads} icon={LeadsIcon} />
+                <MetricCard label="Hot Leads" value={data.hot_leads} tone="danger" icon={HotIcon} />
+                <MetricCard label="Bookings" value={data.total_bookings} tone="success" icon={BookingIcon} />
+                <MetricCard label="Tours" value={data.total_tours} icon={TourIcon} />
+                <MetricCard label="Pending Handoffs" value={data.pending_handoffs} tone="warning" icon={HandoffIcon} />
+                <MetricCard
+                  label="Conversion Rate"
+                  value={data.conversion_rate}
+                  suffix="%"
+                  tone={data.conversion_rate > 0 ? 'success' : 'default'}
+                  icon={ConversionIcon}
                 />
-              </div>
-            </div>
-
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate('/leads?score=warm')}
-              onKeyDown={(e) => handleKeyDown(e, () => navigate('/leads?score=warm'))}
-              className="p-2 -mx-2 rounded-lg cursor-pointer hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="font-medium text-slate-700 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                  Warm Leads
-                </span>
-                <span className="text-slate-500 font-medium">
-                  {warmLeads.length} ({leads.length ? Math.round((warmLeads.length / leads.length) * 100) : 0}%)
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-amber-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${leads.length ? (warmLeads.length / leads.length) * 100 : 0}%` }}
-                />
-              </div>
-            </div>
-
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate('/leads?score=cold')}
-              onKeyDown={(e) => handleKeyDown(e, () => navigate('/leads?score=cold'))}
-              className="p-2 -mx-2 rounded-lg cursor-pointer hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="font-medium text-slate-700 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-                  Cold Leads
-                </span>
-                <span className="text-slate-500 font-medium">
-                  {coldLeads.length} ({leads.length ? Math.round((coldLeads.length / leads.length) * 100) : 0}%)
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-sky-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${leads.length ? (coldLeads.length / leads.length) * 100 : 0}%` }}
-                />
-              </div>
-            </div>
+              </>
+            )}
           </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate('/chat')}
-              className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/50 text-slate-700 hover:text-indigo-600 font-medium text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <span className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-indigo-500" />
-                Start a conversation
-              </span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => navigate('/leads')}
-              className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/50 text-slate-700 hover:text-indigo-600 font-medium text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <span className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                View all leads
-              </span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => navigate('/handoffs?status=pending')}
-              className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/50 text-slate-700 hover:text-indigo-600 font-medium text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <span className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-violet-500" />
-                Review handoffs
-              </span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+          {/* Two-column section: Pipeline + Quick Actions */}
+          {data && (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {/* Lead quality */}
+              <div className="card p-5">
+                <p className="section-title mb-4">Lead Pipeline</p>
+                <div className="space-y-3">
+                  <TierBar label="Hot" value={data.hot_leads} total={data.total_leads} color="bg-red-500" />
+                  <TierBar label="Warm" value={data.warm_leads} total={data.total_leads} color="bg-amber-400" />
+                  <TierBar label="Cold" value={data.cold_leads} total={data.total_leads} color="bg-slate-300" />
+                </div>
+                {data.total_leads === 0 && (
+                  <p className="text-xs text-slate-400 mt-4 text-center">No leads yet. Start a chat conversation to generate leads.</p>
+                )}
+              </div>
 
-      {/* Workspace Utilization */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-indigo-600" />
-          Workspace Utilization
-        </h2>
-        {data.workspaces.length === 0 ? (
-          <div className="p-4 text-sm text-slate-500 bg-slate-50 rounded-lg border border-slate-100">
-            No workspace data available.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {data.workspaces.slice(0, 4).map((ws) => (
-              <div
-                key={ws.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(ws.id ? `/workspaces/${ws.id}` : '/workspaces')}
-                onKeyDown={(e) => handleKeyDown(e, () => navigate(ws.id ? `/workspaces/${ws.id}` : '/workspaces'))}
-                className="p-4 rounded-lg border border-slate-100 bg-slate-50/50 cursor-pointer hover:border-indigo-200 hover:shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-              >
-                <div className="font-medium text-slate-800 text-sm truncate">{ws.name}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{ws.city || 'Location'}</div>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Active bookings</span>
-                  <span className="text-sm font-semibold text-indigo-600">{ws.active_bookings ?? 0}</span>
+              {/* Quick actions */}
+              <div className="card p-5">
+                <p className="section-title mb-4">Quick Actions</p>
+                <div className="space-y-2">
+                  <QuickActionCard
+                    to="/chat"
+                    icon={ChatActionIcon}
+                    label="Start a conversation"
+                    description="Chat with a new lead via Nia"
+                    accent="bg-brand-50"
+                  />
+                  <QuickActionCard
+                    to="/leads"
+                    icon={LeadsActionIcon}
+                    label="View all leads"
+                    description="Browse and filter your CRM"
+                    accent="bg-violet-50"
+                  />
+                  <QuickActionCard
+                    to="/handoffs"
+                    icon={HandoffActionIcon}
+                    label="Review handoffs"
+                    description="Leads requiring human follow-up"
+                    accent="bg-amber-50"
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+
+          {/* Workspace utilization */}
+          {data?.workspace_utilization?.length > 0 && (
+            <div className="card p-5">
+              <p className="section-title mb-4">Workspace Utilization <span className="text-slate-400 font-normal text-xs ml-1">(by bookings)</span></p>
+              <div className="space-y-3">
+                {(() => {
+                  const maxCount = Math.max(...data.workspace_utilization.map(w => w.booking_count), 1)
+                  return data.workspace_utilization.map((w) => (
+                    <div key={w.workspace_id} className="flex items-center gap-3 text-sm">
+                      <span className="text-slate-700 w-40 sm:w-56 truncate shrink-0">
+                        {w.name}
+                        <span className="text-slate-400 text-xs ml-1">({w.city})</span>
+                      </span>
+                      <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-brand-400 transition-all duration-700"
+                          style={{ width: `${Math.round((w.booking_count / maxCount) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-slate-600 font-medium text-xs w-16 text-right shrink-0">
+                        {w.booking_count} {w.booking_count === 1 ? 'booking' : 'bookings'}
+                      </span>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
-  );
+  )
 }
