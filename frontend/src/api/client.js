@@ -1,57 +1,86 @@
-import axios from 'axios';
+const BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message)
+    this.status = status
+  }
+}
 
-const api = axios.create({
-  baseURL: API_BASE,
-  headers: {
-    'Content-Type': 'application/json',
+async function request(path, options = {}) {
+  let resp
+  try {
+    resp = await fetch(`${BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options,
+    })
+  } catch (err) {
+    throw new ApiError('Network error - check your connection and try again.', 0)
+  }
+
+  if (!resp.ok) {
+    let detail = `Request failed (${resp.status})`
+    try {
+      const body = await resp.json()
+      detail = body.detail || detail
+    } catch {
+      // response wasn't JSON - keep the generic message
+    }
+    throw new ApiError(detail, resp.status)
+  }
+
+  if (resp.status === 204) return null
+  return resp.json()
+}
+
+export const api = {
+  // Leads
+  listLeads: () => request('/leads'),
+  getLead: (leadId) => request(`/leads/${encodeURIComponent(leadId)}`),
+  createLead: (payload) => request('/leads', { method: 'POST', body: JSON.stringify(payload) }),
+  updateLead: (leadId, payload) =>
+    request(`/leads/${encodeURIComponent(leadId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+
+  // Chat
+  sendMessage: (payload) => request('/chat/message', { method: 'POST', body: JSON.stringify(payload) }),
+  getChatHistory: (leadId) => request(`/chat/${encodeURIComponent(leadId)}/history`),
+
+  // Workspaces
+  listWorkspaces: (params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null && v !== ''))
+    const suffix = qs.toString() ? `?${qs}` : ''
+    return request(`/workspaces${suffix}`)
   },
-});
+  getWorkspace: (id) => request(`/workspaces/${encodeURIComponent(id)}`),
+  createWorkspace: (payload) => request('/workspaces', { method: 'POST', body: JSON.stringify(payload) }),
+  updateWorkspace: (id, payload) =>
+    request(`/workspaces/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
-export const getLeads = async () => {
-  const res = await api.get('/api/leads');
-  return res.data;
-};
+  // Availability
+  getAvailability: (workspaceId, params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null && v !== ''))
+    const suffix = qs.toString() ? `?${qs}` : ''
+    return request(`/workspaces/${encodeURIComponent(workspaceId)}/availability${suffix}`)
+  },
 
-export const getLead = async (id) => {
-  const res = await api.get(`/api/leads/${id}`);
-  return res.data;
-};
+  // Bookings
+  listBookings: () => request('/bookings'),
+  getBooking: (id) => request(`/bookings/${encodeURIComponent(id)}`),
+  createBooking: (payload) => request('/bookings', { method: 'POST', body: JSON.stringify(payload) }),
+  updateBooking: (id, payload) =>
+    request(`/bookings/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
-export const getBookings = async () => {
-  const res = await api.get('/api/bookings');
-  return res.data;
-};
+  // Tours
+  listTours: () => request('/tours'),
+  getTour: (id) => request(`/tours/${encodeURIComponent(id)}`),
+  createTour: (payload) => request('/tours', { method: 'POST', body: JSON.stringify(payload) }),
+  updateTour: (id, payload) =>
+    request(`/tours/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
-export const getTours = async () => {
-  const res = await api.get('/api/tours');
-  return res.data;
-};
+  // Handoffs
+  listHandoffs: (pendingOnly = false) => request(`/handoffs${pendingOnly ? '?pending_only=true' : ''}`),
+  getHandoff: (leadId) => request(`/handoffs/${encodeURIComponent(leadId)}`),
 
-export const getHandoffs = async () => {
-  const res = await api.get('/api/handoffs');
-  return res.data;
-};
-
-export const updateHandoffStatus = async (id, status, notes) => {
-  const res = await api.patch(`/api/handoffs/${id}`, { status, notes });
-  return res.data;
-};
-
-export const getWorkspaces = async () => {
-  const res = await api.get('/api/workspaces');
-  return res.data;
-};
-
-export const getAnalyticsOverview = async () => {
-  const res = await api.get('/api/analytics/overview');
-  return res.data;
-};
-
-export const sendMessage = async (message, sessionId = null) => {
-  const res = await api.post('/api/chat/message', { message, session_id: sessionId });
-  return res.data;
-};
-
-export default api;
+  // Analytics
+  getAnalytics: () => request('/analytics'),
+}
